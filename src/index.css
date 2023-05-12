@@ -1,0 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Atkinson Hyperlegible;
+  font-weight: 700;
+  font-style: normal;
+}
+
+body {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+
+/* useEffect(() => {
+  //     const numbers = Array.from({ length: 18 }, (_, i) => i + 1);
+  //     const newNumbers = [];
+  
+  //     for (let i = 0; i < 36; i++) {
+  //       const index = Math.floor(Math.random() * numbers.length);
+  //       const num = numbers[index];
+  //       newNumbers.push(num);
+  //       if (newNumbers.filter((item) => item === num).length === 2) {
+  //         numbers.splice(index, 1);
+  //       }
+  //     }
+  
+  //     setItems(newNumbers);
+  //   }, []); */

@@ -2,12 +2,15 @@ import * as React from "react";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-function Game({ gridSize, setGridSize }) {
+function Game() {
   const [myNumber, setNumber] = useState([]);
   const [menu, setMenu] = useState(true);
   const [turns, setTurns] = useState(0);
-  console.log(menu);
+
+  const gridSize = useSelector((store) => store.gridSize);
+
 
   const numbers = [];
   const gridLength = gridSize ? 8 : 18;

@@ -2,11 +2,30 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { setGridSize } from "./store/nameSlice";
+import { setMode } from "./store/modeSlice";
 
-export default function Memory({ gridSize, setGridSize }) {
-  const [mode, setMode] = useState(true);
-
+export default function Memory() {
+  const gridSize = useSelector((store) => store.gridSize);
+  const mode = useSelector((store) => store.mode);
   const [playerAmount, setPlayerAmount] = useState(1);
+
+  const dispatch = useDispatch();
+  const handlerfalse = () => {
+    dispatch(setGridSize(false));
+  };
+  const handler = () => {
+    dispatch(setGridSize(true));
+  };
+
+  const modeHandler = () => {
+    dispatch(setMode(true));
+  };
+  const modeHandlerFalse = () => {
+    dispatch(setMode(false));
+  };
 
   return (
     <>
@@ -15,20 +34,10 @@ export default function Memory({ gridSize, setGridSize }) {
         <Selector>
           <H1>Select Theme</H1>
           <Choose>
-            <NumberButton
-              chooseMode={mode}
-              onClick={() => {
-                setMode(true);
-              }}
-            >
+            <NumberButton mode={mode} onClick={modeHandler}>
               Numbers
             </NumberButton>
-            <IconButton
-              chooseMode={mode}
-              onClick={() => {
-                setMode(false);
-              }}
-            >
+            <IconButton mode={mode} onClick={modeHandlerFalse}>
               Icons
             </IconButton>
           </Choose>
@@ -69,22 +78,8 @@ export default function Memory({ gridSize, setGridSize }) {
           </Players>
           <H3>Grid Size</H3>
           <Choose1>
-            <Number4
-              gridsize={gridSize}
-              onClick={() => {
-                setGridSize(true);
-              }}
-            >
-              4X4
-            </Number4>
-            <Number6
-              gridsize={gridSize}
-              onClick={() => {
-                setGridSize(false);
-              }}
-            >
-              6X6
-            </Number6>
+            <Number4 onClick={handler}>4X4</Number4>
+            <Number6 onClick={handlerfalse}>6X6</Number6>
           </Choose1>
           <Link to="/Game">
             <Start>Start Game</Start>
@@ -145,7 +140,7 @@ const NumberButton = styled.button`
   text-transform: none;
   border: none;
   cursor: pointer;
-  background-color: ${(props) => (props.chooseMode ? "#304859" : "#BCCED9")};
+  background-color: ${(props) => (props.mode ? "#304859" : "#BCCED9")};
 `;
 const IconButton = styled.button`
   color: #fcfcfc;
@@ -157,7 +152,7 @@ const IconButton = styled.button`
   text-transform: none;
   border: none;
   cursor: pointer;
-  background-color: ${(props) => (props.chooseMode ? "#BCCED9" : "#304859")};
+  background-color: ${(props) => (props.mode ? "#BCCED9" : "#304859")};
 `;
 
 const H2 = styled.h1`

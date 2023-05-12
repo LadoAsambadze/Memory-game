@@ -18,7 +18,7 @@ export default function Memory({ gridSize, setGridSize }) {
             <NumberButton
               chooseMode={mode}
               onClick={() => {
-                setMode(!mode);
+                setMode(true);
               }}
             >
               Numbers
@@ -26,7 +26,7 @@ export default function Memory({ gridSize, setGridSize }) {
             <IconButton
               chooseMode={mode}
               onClick={() => {
-                setMode(!mode);
+                setMode(false);
               }}
             >
               Icons
@@ -199,6 +199,7 @@ const Choose1 = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-top: 11px;
+  margin-bottom: 44px;
 `;
 
 const Number4 = styled.button`
@@ -226,7 +227,7 @@ const Number6 = styled.button`
 
 const Start = styled.button`
   padding: 12px 91px 14px 91px;
-  margin-top: 44px;
+
   font-size: 18px;
   line-height: 22px;
   background: #fda214;

@@ -1,14 +1,16 @@
 import * as React from "react";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
-
+import { Link } from "react-router-dom";
 
 function Game({ gridSize, setGridSize }) {
   const [myNumber, setNumber] = useState([]);
-  const [turns, setTurns] = useState(1);
+  const [menu, setMenu] = useState(true);
+  const [turns, setTurns] = useState(0);
+  console.log(menu);
 
   const numbers = [];
-  const gridLength = gridSize ? 6 : 18;
+  const gridLength = gridSize ? 8 : 18;
   for (let i = 1; i <= gridLength; i++) {
     numbers.push({ value: i });
   }
@@ -20,15 +22,46 @@ function Game({ gridSize, setGridSize }) {
     setNumber(shuffleCards);
     setTurns(0);
   };
+  useEffect(() => {
+    shuffleCards();
+  }, []);
 
   return (
     <>
       <Main>
         <Heading>
           <H1>memory</H1>
-          <Menu onClick={shuffleCards}>Menu</Menu>
+          <Menu
+            onClick={() => {
+              setMenu(false);
+            }}
+          >
+            Menu
+          </Menu>
+          <Options menubar={menu}>
+            <OptionList>
+              <GameButton
+                onClick={() => {
+                  shuffleCards();
+                  setMenu(true);
+                }}
+              >
+                Restart
+              </GameButton>
+              <Link to="/">
+                <GameButton menubar={menu}>New Game</GameButton>
+              </Link>
+              <GameButton
+                onClick={() => {
+                  setMenu(true);
+                }}
+              >
+                Resume Game
+              </GameButton>
+            </OptionList>
+          </Options>
         </Heading>
-        <Playzone>
+        <Playzone gridrow={gridSize}>
           {myNumber.map((number, id) => {
             return <Ball key={id}>{number.value}</Ball>;
           })}
@@ -61,6 +94,7 @@ const Main = styled.div`
   padding: 24px;
   display: flex;
   flex-direction: column;
+  z-index: ${(props) => (props.menubar ? 30 : 5)};
 `;
 
 const Heading = styled.div`
@@ -92,8 +126,10 @@ const Playzone = styled.div`
   width: 100%;
   margin-top: 80px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-columns: ${(props) =>
+    props.gridrow ? "repeat(4, 1fr)" : "repeat(6, 1fr)"};
+  grid-template-rows: ${(props) =>
+    props.gridrow ? "repeat(4, 1fr)" : "repeat(6, 1fr)"};
   gap: 10px;
 `;
 
@@ -133,5 +169,38 @@ const Player = styled.div`
     font-size: 24px;
     line-height: 30px;
   }
+`;
+
+const Options = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  padding: 222px 24px 222px 24px;
+  backdrop-filter: blur(1px);
+  background-color: rgba(0, 0, 0, 0.5);
+
+  display: ${(props) => (props.menubar ? "none" : "flex")};
+`;
+const OptionList = styled.div`
+  width: 100%;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  background-color: #f2f2f2;
+  justify-content: space-between;
+  border-radius: 10px;
+`;
+const GameButton = styled.button`
+  width: 100%;
+  border: none;
+  padding: 12px 0 14px 0px;
+  background-color: #dfe7ec;
+  border-radius: 26px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 18px;
+  line-height: 22px;
 `;
 export default Game;

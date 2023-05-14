@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const playerSlice = createSlice({
   name: "player",
   initialState: {
-    value: 1,
+    value: "1",
   },
   reducers: {
     setPlayerAmount: (state, action) => {

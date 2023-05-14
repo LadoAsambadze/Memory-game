@@ -9,13 +9,14 @@ function Game() {
   const [menu, setMenu] = useState(true);
   const playerAmount = useSelector((store) => store.playerAmount.value);
   const gridSize = useSelector((store) => store.gridSize.value);
-  console.log(playerAmount);
+  const [choiceOne, setChoiceOne] = useState(null);
+  const [choiceTwo, setChoiceTwo] = useState(null);
+
   const numbers = [];
-
   for (let i = 1; i <= gridSize; i++) {
-    numbers.push({ value: i });
+    numbers.push({ value: i, matched: false });
   }
-
+  console.log(myNumber);
   const shuffleCards = () => {
     const shuffleCards = [...numbers, ...numbers]
       .sort(() => Math.random() - 0.5)
@@ -25,6 +26,26 @@ function Game() {
   useEffect(() => {
     shuffleCards();
   }, []);
+
+  function handleClick(value) {
+    choiceOne ? setChoiceTwo(value) : setChoiceOne(value);
+  }
+  useEffect(() => {
+    if (choiceOne && choiceTwo) {
+      if (choiceOne === choiceTwo) {
+        setNumber((prevMyNumber) => {
+          return prevMyNumber.map((number) => {
+            if (number.value === choiceOne) {
+              return { ...number, matched: true };
+            }
+            return number;
+          });
+        });
+      }
+      setChoiceOne(null);
+      setChoiceTwo(null);
+    }
+  }, [choiceOne, choiceTwo]);
 
   return (
     <>
@@ -48,11 +69,7 @@ function Game() {
               Restart
             </GameButtonTablet>
             <Link to="/">
-              <GameButtonTablet
-                style={{ padding: "13px 22px 14px 22px", marginLeft: "16px" }}
-              >
-                New Game
-              </GameButtonTablet>
+              <GameButtonTablet>New Game</GameButtonTablet>
             </Link>
           </TabletMenu>
           <Options menubar={menu}>
@@ -81,7 +98,12 @@ function Game() {
         <Playzone gridAmount={gridSize}>
           {myNumber.map((number, id) => {
             return (
-              <Ball gridAmount={gridSize} key={id}>
+              <Ball
+                gridAmount={gridSize}
+                key={id}
+                onClick={() => handleClick(number.value)}
+            
+              >
                 {number.value}
               </Ball>
             );
@@ -142,7 +164,7 @@ const Main = styled.div`
   max-width: 100%;
   padding: 24px;
   z-index: ${(props) => (props.menubar ? 30 : 5)};
-  
+
   @media (min-width: 768px) {
     padding: 38px;
   }
@@ -324,6 +346,10 @@ const GameButton = styled.button`
   text-align: center;
   font-size: 18px;
   line-height: 22px;
+  &:hover {
+    background-color: #fda214;
+    color: #fcfcfc;
+  }
 `;
 const GameButtonTablet = styled.button`
   border: none;
@@ -335,6 +361,10 @@ const GameButtonTablet = styled.button`
   font-size: 20px;
   line-height: 25px;
   margin-left: 16px;
+  &:hover {
+    background-color: #fda214;
+    color: #fcfcfc;
+  }
 `;
 
 const OnlyOne = styled.div`

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { setGridSize } from "./store/nameSlice";
@@ -39,6 +39,10 @@ export default function Memory() {
       return "#BCCED9";
     }
   };
+
+  useEffect(() => {
+    getPlayerColor("1");
+  }, []);
 
   return (
     <>
@@ -210,6 +214,7 @@ const Players = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 11px;
+
   @media (min-width: 768px) {
     margin-top: 16px;
   }
@@ -222,6 +227,7 @@ const Player = styled.div`
   text-align: center;
   color: #fcfcfc;
   border-radius: 26px;
+  background-color: #304859;
   @media (min-width: 768px) {
     font-size: 26px;
     line-height: 32px;

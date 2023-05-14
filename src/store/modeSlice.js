@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const modeSlice = createSlice({
   name: "mode",
   initialState: {
-    Boolean: true,
+    Boolean: "true",
   },
   reducers: {
     setMode: (state, action) => {

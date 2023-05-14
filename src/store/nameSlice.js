@@ -3,16 +3,14 @@ import { createSlice } from "@reduxjs/toolkit";
 const nameSlice = createSlice({
   name: "gridSize",
   initialState: {
-    Boolean: true,
+    value: 8,
   },
   reducers: {
     setGridSize: (state, action) => {
-      state.Boolean = action.payload;
+      state.value = action.payload;
     },
   },
 });
-
-
 
 export const { setGridSize } = nameSlice.actions;
 

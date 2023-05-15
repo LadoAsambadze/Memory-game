@@ -7,7 +7,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Memory />} />
-        <Route path="/Game" element={<Game />} />
+        <Route path="/Game" element={<Game flipped={true} />} />
       </Routes>
     </>
   );

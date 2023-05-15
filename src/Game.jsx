@@ -4,19 +4,20 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-function Game() {
+function Game(props) {
   const [myNumber, setNumber] = useState([]);
   const [menu, setMenu] = useState(true);
   const playerAmount = useSelector((store) => store.playerAmount.value);
   const gridSize = useSelector((store) => store.gridSize.value);
   const [choiceOne, setChoiceOne] = useState(null);
   const [choiceTwo, setChoiceTwo] = useState(null);
+  const [clickedItem, setClickedItem] = useState(null);
 
   const numbers = [];
   for (let i = 1; i <= gridSize; i++) {
     numbers.push({ value: i, matched: false });
   }
-  console.log(myNumber);
+
   const shuffleCards = () => {
     const shuffleCards = [...numbers, ...numbers]
       .sort(() => Math.random() - 0.5)
@@ -42,11 +43,14 @@ function Game() {
           });
         });
       }
-      setChoiceOne(null);
-      setChoiceTwo(null);
+      setTimeout(function () {
+        setChoiceOne(null);
+        setChoiceTwo(null);
+      }, 3000);
     }
   }, [choiceOne, choiceTwo]);
-
+  console.log(choiceOne, choiceTwo);
+  console.log(clickedItem);
   return (
     <>
       <Main>
@@ -98,13 +102,27 @@ function Game() {
         <Playzone gridAmount={gridSize}>
           {myNumber.map((number, id) => {
             return (
-              <Ball
-                gridAmount={gridSize}
-                key={id}
-                onClick={() => handleClick(number.value)}
-            
-              >
-                {number.value}
+              <Ball gridAmount={gridSize} key={id}>
+                <Random
+                  check={
+                    number.value === choiceOne || number.value === choiceTwo
+                  }
+                  show={clickedItem === number.id}
+                >
+                  {number.value}
+                </Random>
+                <Hide
+                  show={clickedItem === number.id}
+                  check2={
+                    number.value === choiceOne || number.value === choiceTwo
+                  }
+                  onClick={() => {
+                    handleClick(number.value);
+                    setClickedItem(number.id);
+                  }}
+                >
+                  ?
+                </Hide>
               </Ball>
             );
           })}
@@ -239,6 +257,7 @@ const Playzone = styled.div`
 `;
 
 const Ball = styled.div`
+  position: relative;
   background-color: #fda214;
   text-align: center;
   color: #fcfcfc;
@@ -247,11 +266,23 @@ const Ball = styled.div`
   font-size: ${(props) => (props.gridAmount === 8 ? "40px" : "24px")};
   border-radius: ${(props) => (props.gridAmount === 8 ? "59px" : "41px")};
   line-height: ${(props) => (props.gridAmount === 8 ? "50px" : "30px")};
+
   @media (min-width: 768px) {
     padding: ${(props) => (props.gridAmount === 8 ? "12px " : "5px")};
     font-size: ${(props) => (props.gridAmount === 8 ? "56px" : "44px")};
     line-height: ${(props) => (props.gridAmount === 8 ? "56px" : "69px")};
   }
+`;
+
+const Random = styled.div`
+  display: ${(props) => (props.check && props.show ? "block" : "none")};
+`;
+
+const Hide = styled.div`
+  width: 100%;
+  height: 100%;
+  background-color: #fda214;
+  display: ${(props) => (props.check2 && props.show ? "none" : "block")};
 `;
 
 const Pointzone = styled.div`

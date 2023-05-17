@@ -66,7 +66,7 @@ function Game(props) {
 
         resetTurns();
       } else {
-        setTimeout(() => resetTurns(), 1000);
+        setTimeout(() => resetTurns(), 700);
       }
     }
   }, [choiceOne, choiceTwo]);
@@ -208,7 +208,7 @@ function Game(props) {
             </Moves>
           </OnlyOne>
         </Pointzone>
-        <SingleScore finished={finish}>
+        <SingleScore finished={finish} playerAmount={playerAmount}>
           <GetScore>
             <Congrats>You did it!</Congrats>
             <Comment>Game over! Here’s how you got on…</Comment>
@@ -237,6 +237,33 @@ function Game(props) {
             </DivDirection>
           </GetScore>
         </SingleScore>
+        <PlayersScore finished={finish} playerAmount={playerAmount}>
+          <GetScore>
+            <Congrats>Player 3 Wins!</Congrats>
+            <Comment>Game over! Here are the results…</Comment>
+            {Array.from({ length: playerAmount }, (_, index) => (
+              <Elapse key={index}>
+                <ElapseText></ElapseText>
+                <ElapseTime>hgewgew</ElapseTime>
+              </Elapse>
+            ))}
+            <DivDirection>
+              <Duplicate
+                onClick={() => {
+                  shuffleCards();
+                  setFinish(false);
+                  setTime(121);
+                  setStop(!stop);
+                }}
+              >
+                Restart
+              </Duplicate>
+              <Link to="/" style={{ width: "100%" }}>
+                <Duplicate2>Setup New Game</Duplicate2>
+              </Link>
+            </DivDirection>
+          </GetScore>
+        </PlayersScore>
       </Main>
     </>
   );
@@ -544,7 +571,28 @@ const SingleScore = styled.div`
   z-index: 5;
   top: 0;
   left: 0;
-  display: ${(props) => (props.finished ? "block" : "none")};
+  display: ${(props) =>
+    props.finished && props.playerAmount === "1" ? "block" : "none"};
+  @media (min-width: 768px) {
+    padding: 257px 57px;
+  }
+  @media (min-width: 1440px) {
+    padding: 257px 393px;
+  }
+`;
+
+const PlayersScore = styled.div`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  padding: 146px 24px;
+  backdrop-filter: blur(1px);
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 5;
+  top: 0;
+  left: 0;
+  display: ${(props) =>
+    props.finished && props.playerAmount !== "1" ? "block" : "none"};
   @media (min-width: 768px) {
     padding: 257px 57px;
   }
@@ -600,7 +648,7 @@ const Elapse = styled.div`
   align-items: center;
   margin-top: 24px;
   @media (min-width: 768px) {
-    padding: 25px 32px;
+    padding: 15px 32px;
     border-radius: 10px;
     margin-top: 40px;
   }

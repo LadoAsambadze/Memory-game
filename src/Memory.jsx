@@ -108,7 +108,7 @@ export default function Memory() {
 
 const Main = styled.div`
   max-width: 100%;
-  min-height: 100%;
+  min-height: 100vh;
   background-color: #152938;
   padding: 80px 24px 116px 24px;
   @media (min-width: 768px) {

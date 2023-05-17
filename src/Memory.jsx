@@ -108,6 +108,7 @@ export default function Memory() {
 
 const Main = styled.div`
   max-width: 100%;
+  min-height: 100%;
   background-color: #152938;
   padding: 80px 24px 116px 24px;
   @media (min-width: 768px) {
@@ -242,7 +243,6 @@ const Player = styled.div`
 `;
 
 const H3 = styled.h1`
-
   font-size: 100%;
   line-height: 19px;
   color: #7191a5;

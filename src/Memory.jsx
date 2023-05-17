@@ -61,7 +61,10 @@ export default function Memory() {
           <H2>Numbers of Players</H2>
           <Players>
             <Player
-              style={{ backgroundColor: getPlayerColor("1") }}
+              style={{
+                backgroundColor: getPlayerColor("1"),
+                marginLeft: "0px ",
+              }}
               onClick={playerHandler}
             >
               1
@@ -211,10 +214,8 @@ const H2 = styled.h1`
 const Players = styled.div`
   width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-top: 11px;
-
   @media (min-width: 768px) {
     margin-top: 16px;
   }
@@ -228,15 +229,21 @@ const Player = styled.div`
   color: #fcfcfc;
   border-radius: 26px;
   background-color: #304859;
+  margin-left: 10px;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
   @media (min-width: 768px) {
     font-size: 26px;
     line-height: 32px;
     padding: 11px 42px 9px 42px;
+    margin-left: 21px;
   }
 `;
 
 const H3 = styled.h1`
-  font-size: 15px;
+
+  font-size: 100%;
   line-height: 19px;
   color: #7191a5;
   margin-top: 24px;

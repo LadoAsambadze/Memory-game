@@ -3,54 +3,79 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import SingleCard from "./Components/singleCard";
+import CountdownTimer from "./Components/timer";
 
 function Game(props) {
-  const [myNumber, setNumber] = useState([]);
   const [menu, setMenu] = useState(true);
   const playerAmount = useSelector((store) => store.playerAmount.value);
   const gridSize = useSelector((store) => store.gridSize.value);
+  const [numArray, setNumArray] = useState([]);
+  const [turns, setTurns] = useState(0);
   const [choiceOne, setChoiceOne] = useState(null);
   const [choiceTwo, setChoiceTwo] = useState(null);
-  const [clickedItem, setClickedItem] = useState(null);
+  const [stop, setStop] = useState(false);
+  const [time, setTime] = useState(3);
+  const [finish, setFinish] = useState(false);
+  console.log(finish);
+
+  const matchedItems = numArray.filter((num) => num.matched === true);
+
+  useEffect(() => {
+    if (matchedItems.length / 2 === gridSize || time === 0) {
+      setFinish(true);
+    }
+  }, []);
+
+  const handleStop = () => {
+    setStop(!stop);
+  };
 
   const numbers = [];
-  for (let i = 1; i <= gridSize; i++) {
-    numbers.push({ value: i, matched: false });
+  for (let i = 0; i < gridSize; i++) {
+    numbers.push({ value: i + 1, matched: false });
   }
-
-  const shuffleCards = () => {
-    const shuffleCards = [...numbers, ...numbers]
-      .sort(() => Math.random() - 0.5)
-      .map((card) => ({ ...card, id: Math.random() }));
-    setNumber(shuffleCards);
-  };
   useEffect(() => {
     shuffleCards();
   }, []);
 
-  function handleClick(value) {
-    choiceOne ? setChoiceTwo(value) : setChoiceOne(value);
-  }
+  const shuffleCards = () => {
+    const shuffledCards = [...numbers, ...numbers]
+      .sort(() => Math.random() - 0.5)
+      .map((number) => ({ ...number, id: Math.random() }));
+    setNumArray(shuffledCards);
+    setTurns(0);
+  };
+
+  const handleChoice = (num) => {
+    choiceOne ? setChoiceTwo(num) : setChoiceOne(num);
+  };
+
   useEffect(() => {
     if (choiceOne && choiceTwo) {
-      if (choiceOne === choiceTwo) {
-        setNumber((prevMyNumber) => {
-          return prevMyNumber.map((number) => {
-            if (number.value === choiceOne) {
-              return { ...number, matched: true };
+      if (choiceOne.value === choiceTwo.value) {
+        setNumArray((prevNums) => {
+          return prevNums.map((num) => {
+            if (num.value === choiceOne.value) {
+              return { ...num, matched: true };
             }
-            return number;
+            return num;
           });
         });
+
+        resetTurns();
+      } else {
+        setTimeout(() => resetTurns(), 1000);
       }
-      setTimeout(function () {
-        setChoiceOne(null);
-        setChoiceTwo(null);
-      }, 3000);
     }
   }, [choiceOne, choiceTwo]);
-  console.log(choiceOne, choiceTwo);
-  console.log(clickedItem);
+
+  const resetTurns = () => {
+    setChoiceOne(null);
+    setChoiceTwo(null);
+    setTurns((prevTurns) => prevTurns + 1);
+  };
+
   return (
     <>
       <Main>
@@ -59,6 +84,7 @@ function Game(props) {
           <Menu
             onClick={() => {
               setMenu(false);
+              handleStop(!stop);
             }}
           >
             Menu
@@ -82,6 +108,7 @@ function Game(props) {
                 onClick={() => {
                   shuffleCards();
                   setMenu(true);
+                  setFinish(false);
                 }}
               >
                 Restart
@@ -92,6 +119,7 @@ function Game(props) {
               <GameButton
                 onClick={() => {
                   setMenu(true);
+                  handleStop(!stop);
                 }}
               >
                 Resume Game
@@ -100,32 +128,17 @@ function Game(props) {
           </Options>
         </Heading>
         <Playzone gridAmount={gridSize}>
-          {myNumber.map((number, id) => {
-            return (
-              <Ball gridAmount={gridSize} key={id}>
-                <Random
-                  check={
-                    number.value === choiceOne || number.value === choiceTwo
-                  }
-                  show={clickedItem === number.id}
-                >
-                  {number.value}
-                </Random>
-                <Hide
-                  show={clickedItem === number.id}
-                  check2={
-                    number.value === choiceOne || number.value === choiceTwo
-                  }
-                  onClick={() => {
-                    handleClick(number.value);
-                    setClickedItem(number.id);
-                  }}
-                >
-                  ?
-                </Hide>
-              </Ball>
-            );
-          })}
+          <Ball gridAmount={gridSize}>
+            {numArray.map((num) => (
+              <SingleCard
+                key={num.id}
+                newnum={num}
+                newhandleChoice={handleChoice}
+                flipped={num === choiceOne || num === choiceTwo || num.matched}
+                gridAmount={gridSize}
+              />
+            ))}
+          </Ball>
         </Playzone>
         <Pointzone players={playerAmount}>
           <Player
@@ -165,14 +178,42 @@ function Game(props) {
           >
             <Time>
               <TimeHeader>Time</TimeHeader>
-              <TimeCount>1:50</TimeCount>
+              <TimeCount>
+                <CountdownTimer stop={stop} time={time} setTime={setTime} />
+              </TimeCount>
             </Time>
             <Moves>
               <MovesHeader>Moves</MovesHeader>
-              <MovesCount>39</MovesCount>
+              <MovesCount>{turns}</MovesCount>
             </Moves>
           </OnlyOne>
         </Pointzone>
+        <SingleScore finished={finish}>
+          <GetScore>
+            <Congrats>You did it!</Congrats>
+            <Comment>Game over! Here’s how you got on…</Comment>
+            <Elapse>
+              <ElapseText>Time Elapsed</ElapseText>
+              <ElapseTime>1:33</ElapseTime>
+            </Elapse>
+            <Elapse style={{ marginTop: "10px" }}>
+              <ElapseText>Moves Taken</ElapseText>
+              <ElapseTime>39 moves</ElapseTime>
+            </Elapse>
+            <DivDirection>
+              <Duplicate
+                onClick={() => {
+                  shuffleCards();
+                }}
+              >
+                Restart
+              </Duplicate>
+              <Link to="/" style={{ width: "100%" }}>
+                <Duplicate2>Setup New Game</Duplicate2>
+              </Link>
+            </DivDirection>
+          </GetScore>
+        </SingleScore>
       </Main>
     </>
   );
@@ -180,6 +221,7 @@ function Game(props) {
 
 const Main = styled.div`
   max-width: 100%;
+  min-height: 100vh;
   padding: 24px;
   z-index: ${(props) => (props.menubar ? 30 : 5)};
 
@@ -237,52 +279,33 @@ const TabletMenu = styled.div`
 const Playzone = styled.div`
   width: 100%;
   margin-top: 80px;
-  display: grid;
-  grid-template-rows: ${(props) =>
-    props.gridAmount === 8 ? "repeat(4, 1fr)" : "repeat(6, 1fr)"};
-  grid-template-columns: ${(props) =>
-    props.gridAmount === 8 ? "repeat(4, 1fr)" : "repeat(6, 1fr)"};
-  gap: 16px;
+
   @media (min-width: 768px) {
-    margin-top: 121px;
-    gap: 20px;
-    padding-left: ${(props) => (props.gridAmount === 8 ? "80px" : "70px")};
-    padding-right: ${(props) => (props.gridAmount === 8 ? "80px" : "70px")};
+    margin-top: ${(props) => (props.gridAmount === 8 ? "157px" : "121px")};
   }
   @media (min-width: 1440px) {
-    margin-top: 86px;
-    padding-left: ${(props) => (props.gridAmount === 8 ? "290px" : "270px")};
-    padding-right: ${(props) => (props.gridAmount === 8 ? "290px" : "270px")};
+    margin-top: ${(props) => (props.gridAmount === 8 ? "106px" : "85px")};
   }
 `;
 
 const Ball = styled.div`
-  position: relative;
-  background-color: #fda214;
-  text-align: center;
-  color: #fcfcfc;
-  line-height: 30px;
-  padding: ${(props) => (props.gridAmount === 8 ? "7px 5px " : "7px 5px")};
-  font-size: ${(props) => (props.gridAmount === 8 ? "40px" : "24px")};
-  border-radius: ${(props) => (props.gridAmount === 8 ? "59px" : "41px")};
-  line-height: ${(props) => (props.gridAmount === 8 ? "50px" : "30px")};
+  display: grid;
+  grid-template-columns: ${(props) =>
+    props.gridAmount === 8 ? "repeat(4, 1fr)" : "repeat(6, 1fr)"};
+  grid-template-rows: ${(props) =>
+    props.gridAmount === 8 ? "repeat(4, 1fr)" : "repeat(6, 1fr)"};
+  gap: 10px;
 
   @media (min-width: 768px) {
-    padding: ${(props) => (props.gridAmount === 8 ? "12px " : "5px")};
-    font-size: ${(props) => (props.gridAmount === 8 ? "56px" : "44px")};
-    line-height: ${(props) => (props.gridAmount === 8 ? "56px" : "69px")};
+    gap: ${(props) => (props.gridAmount === 8 ? "20px" : "16px")};
+    padding-left: ${(props) => (props.gridAmount === 8 ? "80px" : "60px")};
+    padding-right: ${(props) => (props.gridAmount === 8 ? "80px" : "60px")};
   }
-`;
-
-const Random = styled.div`
-  display: ${(props) => (props.check && props.show ? "block" : "none")};
-`;
-
-const Hide = styled.div`
-  width: 100%;
-  height: 100%;
-  background-color: #fda214;
-  display: ${(props) => (props.check2 && props.show ? "none" : "block")};
+  @media (min-width: 1440px) {
+    gap: ${(props) => (props.gridAmount === 8 ? "20px" : "16px")};
+    padding-left: ${(props) => (props.gridAmount === 8 ? "290px" : "270px")};
+    padding-right: ${(props) => (props.gridAmount === 8 ? "290px" : "270px")};
+  }
 `;
 
 const Pointzone = styled.div`
@@ -357,6 +380,7 @@ const Options = styled.div`
   backdrop-filter: blur(1px);
   background-color: rgba(0, 0, 0, 0.5);
   display: ${(props) => (props.menubar ? "none" : "flex")};
+  z-index: 5;
 `;
 const OptionList = styled.div`
   width: 100%;
@@ -437,7 +461,7 @@ const TimeHeader = styled.p`
   }
 `;
 
-const TimeCount = styled.p`
+const TimeCount = styled.div`
   color: #304859;
   font-size: 24px;
   line-height: 30px;
@@ -484,4 +508,153 @@ const MovesCount = styled.p`
     line-height: 40px;
   }
 `;
+
+const SingleScore = styled.div`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  padding: 146px 24px;
+  backdrop-filter: blur(1px);
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 5;
+  top: 0;
+  left: 0;
+  display: ${(props) => (props.finished ? "block" : "none")};
+  @media (min-width: 768px) {
+    padding: 257px 57px;
+  }
+  @media (min-width: 1440px) {
+    padding: 257px 393px;
+  }
+`;
+
+const GetScore = styled.div`
+  width: 100%;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  padding: 32px 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  @media (min-width: 768px) {
+    padding: 51px 57px 70px 57px;
+  }
+`;
+const Congrats = styled.span`
+  color: #152938;
+  font-size: 24px;
+  line-height: 30px;
+  text-align: center;
+  @media (min-width: 1440px) {
+    font-size: 48px;
+    line-height: 60px;
+  }
+`;
+
+const Comment = styled.span`
+  font-size: 14px;
+  line-height: 17px;
+  color: #7191a5;
+  margin-top: 9px;
+  @media (min-width: 768px) {
+    font-size: 18px;
+    line-height: 22px;
+    margin-top: 16px;
+  }
+`;
+
+const Elapse = styled.div`
+  border-radius: 5px;
+  background-color: #dfe7ec;
+  width: 100%;
+  padding: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  @media (min-width: 768px) {
+    padding: 25px 32px;
+    border-radius: 10px;
+    margin-top: 40px;
+  }
+`;
+
+const ElapseText = styled.span`
+  color: #7191a5;
+  font-size: 13px;
+  line-height: 16px;
+  @media (min-width: 768px) {
+    font-size: 18px;
+    line-height: 22px;
+  }
+`;
+const ElapseTime = styled.span`
+  font-size: 20px;
+  line-height: 25px;
+  color: #304859;
+  @media (min-width: 768px) {
+    font-size: 32px;
+    line-height: 40px;
+  }
+`;
+
+const DivDirection = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+  }
+`;
+
+const Duplicate = styled.button`
+  width: 100%;
+  border: none;
+  padding: 12px 0 14px 0px;
+  background-color: #dfe7ec;
+  border-radius: 26px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 18px;
+  line-height: 22px;
+  &:hover {
+    background-color: #fda214;
+    color: #fcfcfc;
+  }
+  @media (min-width: 768px) {
+    width: 100%;
+    margin-right: 16px;
+  }
+`;
+
+const Duplicate2 = styled.button`
+  width: 100%;
+  border: none;
+  margin-top: 16px;
+  padding: 12px 0 14px 0px;
+  background-color: #dfe7ec;
+  border-radius: 26px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 18px;
+  line-height: 22px;
+  &:hover {
+    background-color: #fda214;
+    color: #fcfcfc;
+  }
+  @media (min-width: 768px) {
+    width: 100%;
+    margin: 0;
+  }
+`;
+
 export default Game;

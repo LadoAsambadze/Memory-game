@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const CountdownTimer = ({ stop, time, setTime }) => {
+const CountdownTimer = ({ stop, time, setTime, format }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setTime((prevTime) => {
@@ -17,18 +17,9 @@ const CountdownTimer = ({ stop, time, setTime }) => {
     };
   }, [stop]);
 
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const secondsRemaining = seconds % 60;
-
-    return `${minutes.toString().padStart(2, "0")}:${secondsRemaining
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
   return (
     <div>
-      <Count>{formatTime(time)}</Count>
+      <Count>{format(time)}</Count>
     </div>
   );
 };

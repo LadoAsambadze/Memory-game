@@ -15,17 +15,18 @@ function Game(props) {
   const [choiceOne, setChoiceOne] = useState(null);
   const [choiceTwo, setChoiceTwo] = useState(null);
   const [stop, setStop] = useState(false);
-  const [time, setTime] = useState(3);
+  const [time, setTime] = useState(120);
   const [finish, setFinish] = useState(false);
-  console.log(finish);
+
+  let timeShow = 120 - time;
 
   const matchedItems = numArray.filter((num) => num.matched === true);
-
   useEffect(() => {
-    if (matchedItems.length / 2 === gridSize || time === 0) {
+    if (matchedItems.length / 2 === gridSize) {
       setFinish(true);
+      setStop(true);
     }
-  }, []);
+  }, [matchedItems, gridSize]);
 
   const handleStop = () => {
     setStop(!stop);
@@ -76,6 +77,15 @@ function Game(props) {
     setTurns((prevTurns) => prevTurns + 1);
   };
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secondsRemaining = seconds % 60;
+
+    return `${minutes.toString().padStart(2, "0")}:${secondsRemaining
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
   return (
     <>
       <Main>
@@ -84,7 +94,7 @@ function Game(props) {
           <Menu
             onClick={() => {
               setMenu(false);
-              handleStop(!stop);
+              setStop(!stop);
             }}
           >
             Menu
@@ -94,6 +104,8 @@ function Game(props) {
               onClick={() => {
                 shuffleCards();
                 setMenu(true);
+                setFinish(false);
+                setTime(121);
               }}
             >
               Restart
@@ -109,6 +121,9 @@ function Game(props) {
                   shuffleCards();
                   setMenu(true);
                   setFinish(false);
+                  setTime(121);
+                  setStop(!stop);
+                  console.log(stop);
                 }}
               >
                 Restart
@@ -179,11 +194,16 @@ function Game(props) {
             <Time>
               <TimeHeader>Time</TimeHeader>
               <TimeCount>
-                <CountdownTimer stop={stop} time={time} setTime={setTime} />
+                <CountdownTimer
+                  stop={stop}
+                  time={time}
+                  setTime={setTime}
+                  format={formatTime}
+                />
               </TimeCount>
             </Time>
             <Moves>
-              <MovesHeader>Moves</MovesHeader>
+              <MovesHeader>Moves </MovesHeader>
               <MovesCount>{turns}</MovesCount>
             </Moves>
           </OnlyOne>
@@ -194,16 +214,19 @@ function Game(props) {
             <Comment>Game over! Here’s how you got on…</Comment>
             <Elapse>
               <ElapseText>Time Elapsed</ElapseText>
-              <ElapseTime>1:33</ElapseTime>
+              <ElapseTime>{formatTime(timeShow)}</ElapseTime>
             </Elapse>
             <Elapse style={{ marginTop: "10px" }}>
               <ElapseText>Moves Taken</ElapseText>
-              <ElapseTime>39 moves</ElapseTime>
+              <ElapseTime>{turns} moves</ElapseTime>
             </Elapse>
             <DivDirection>
               <Duplicate
                 onClick={() => {
                   shuffleCards();
+                  setFinish(false);
+                  setTime(121);
+                  setStop(!stop);
                 }}
               >
                 Restart
@@ -387,8 +410,9 @@ const OptionList = styled.div`
   padding: 24px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   background-color: #f2f2f2;
-  justify-content: space-between;
+
   border-radius: 10px;
 `;
 const GameButton = styled.button`
@@ -396,6 +420,7 @@ const GameButton = styled.button`
   border: none;
   padding: 12px 0 14px 0px;
   background-color: #dfe7ec;
+  margin-top: 16px;
   border-radius: 26px;
   cursor: pointer;
   text-align: center;

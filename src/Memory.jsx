@@ -7,13 +7,19 @@ import { useSelector } from "react-redux";
 import { setGridSize } from "./store/nameSlice";
 import { setMode } from "./store/modeSlice";
 import { setPlayerAmount } from "./store/playerSlice";
+import { setPairs } from "./store/pairsSlice";
 
 export default function Memory() {
   const gridSize = useSelector((store) => store.gridSize.value);
   const mode = useSelector((store) => store.mode.Boolean);
   const playerAmount = useSelector((store) => store.playerAmount.value);
+  const pairs = useSelector((store) => store.pairs.array);
 
   const dispatch = useDispatch();
+
+  const forPairs = () => {
+    dispatch(setPairs(Array(+playerAmount).fill(0)));
+  };
 
   const gridHandler = () => {
     dispatch(setGridSize(8));
@@ -98,7 +104,7 @@ export default function Memory() {
             </Number6>
           </Choose1>
           <Link to="/Game">
-            <Start>Start Game</Start>
+            <Start onClick={forPairs}>Start Game</Start>
           </Link>
         </Selector>
       </Main>

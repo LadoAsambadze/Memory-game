@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SingleCard from "./Components/singleCard";
 import CountdownTimer from "./Components/timer";
 
@@ -10,6 +10,7 @@ function Game(props) {
   const [menu, setMenu] = useState(true);
   const playerAmount = useSelector((store) => store.playerAmount.value);
   const gridSize = useSelector((store) => store.gridSize.value);
+  const pairs = useSelector((store) => store.pairs.array);
   const [numArray, setNumArray] = useState([]);
   const [turns, setTurns] = useState(0);
   const [choiceOne, setChoiceOne] = useState(null);
@@ -17,6 +18,32 @@ function Game(props) {
   const [stop, setStop] = useState(false);
   const [time, setTime] = useState(120);
   const [finish, setFinish] = useState(false);
+  const [double, setDouble] = useState(pairs);
+  const [currentPlayer, setCurrentPlayer] = useState(0);
+  console.log(double);
+
+  const highestPairsIndex = double.indexOf(Math.max(...double));
+  const highesPlayer = highestPairsIndex + 1;
+  const hasEqualPairs = double.some(
+    (double, index) =>
+      double === double[highestPairsIndex] && index !== highestPairsIndex
+  );
+
+  useEffect(() => {
+    if (choiceOne && choiceTwo) {
+      if (choiceOne.value === choiceTwo.value) {
+        setDouble((prevPairs) => {
+          const newPairs = [...prevPairs];
+          newPairs[currentPlayer] += 1;
+          console.log(newPairs);
+
+          return newPairs;
+        });
+      } else {
+        setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % 4);
+      }
+    }
+  }, [choiceOne, choiceTwo]);
 
   let timeShow = 120 - time;
 
@@ -106,6 +133,7 @@ function Game(props) {
                 setMenu(true);
                 setFinish(false);
                 setTime(121);
+                setDouble(Array(+playerAmount).fill(0));
               }}
             >
               Restart
@@ -123,7 +151,7 @@ function Game(props) {
                   setFinish(false);
                   setTime(121);
                   setStop(!stop);
-                  console.log(stop);
+                  setDouble(Array(+playerAmount).fill(0));
                 }}
               >
                 Restart
@@ -158,34 +186,34 @@ function Game(props) {
         <Pointzone players={playerAmount}>
           <Player
             style={{
-              display: playerAmount === "1" ? "none" : "null",
+              display: playerAmount === "1" ? "none" : null,
             }}
           >
             <span>P1</span>
             <p>Player 1</p>
-            <span>3</span>
+            <span>{double[0]}</span>
           </Player>
           <Player
             style={{
-              display: playerAmount < "2" ? "none" : "null",
+              display: playerAmount < "2" ? "none" : null,
             }}
           >
             <span>P2</span>
             <p>Player 2</p>
-            <span>0</span>
+            <span>{double[1]}</span>
           </Player>
-          <Player style={{ display: playerAmount < "3" ? "none" : "null" }}>
+          <Player style={{ display: playerAmount < "3" ? "none" : null }}>
             <span>P3</span>
             <p>Player 3</p>
-            <span>5</span>
+            <span>{double[2]}</span>
           </Player>
           <Player
             players={playerAmount}
-            style={{ display: playerAmount < "4" ? "none" : "null" }}
+            style={{ display: playerAmount < "4" ? "none" : null }}
           >
             <span>P4</span>
             <p>Player 4</p>
-            <span>1</span>
+            <span>{double[3]}</span>
           </Player>
           <OnlyOne
             players={playerAmount}
@@ -227,6 +255,7 @@ function Game(props) {
                   setFinish(false);
                   setTime(121);
                   setStop(!stop);
+                  setDouble(Array(+playerAmount).fill(0));
                 }}
               >
                 Restart
@@ -239,13 +268,46 @@ function Game(props) {
         </SingleScore>
         <PlayersScore finished={finish} playerAmount={playerAmount}>
           <GetScore>
-            <Congrats>Player 3 Wins!</Congrats>
-            <Comment>Game over! Here are the results…</Comment>
+            <Congrats style={{ order: "-100" }}>
+              {hasEqualPairs
+                ? `It’s a tie!`
+                : ` Player ${highesPlayer} Wins!!!`}
+            </Congrats>
+            <Comment style={{ order: "-99" }}>
+              Game over! Here are the results…
+            </Comment>
             {Array.from({ length: playerAmount }, (_, index) => (
-              <Elapse key={index}>
-                <ElapseText></ElapseText>
-                <ElapseTime>hgewgew</ElapseTime>
-              </Elapse>
+              <div key={index} style={{ width: "100%", order: -double[index] }}>
+                <Elapse
+                  style={{
+                    background:
+                      index === highestPairsIndex && !hasEqualPairs
+                        ? "#152938"
+                        : null,
+                  }}
+                >
+                  <ElapseText
+                    style={{
+                      color:
+                        index === highestPairsIndex && !hasEqualPairs
+                          ? "#FCFCFC"
+                          : null,
+                    }}
+                  >
+                    Player {index + 1}
+                  </ElapseText>
+                  <ElapseTime
+                    style={{
+                      color:
+                        index === highestPairsIndex && !hasEqualPairs
+                          ? "#FCFCFC"
+                          : null,
+                    }}
+                  >
+                    {double[index]} Pairs
+                  </ElapseTime>
+                </Elapse>
+              </div>
             ))}
             <DivDirection>
               <Duplicate
@@ -254,6 +316,7 @@ function Game(props) {
                   setFinish(false);
                   setTime(121);
                   setStop(!stop);
+                  setDouble(Array(+playerAmount).fill(0));
                 }}
               >
                 Restart

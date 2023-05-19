@@ -13,21 +13,18 @@ export default function Memory() {
   const gridSize = useSelector((store) => store.gridSize.value);
   const mode = useSelector((store) => store.mode.Boolean);
   const playerAmount = useSelector((store) => store.playerAmount.value);
-  const pairs = useSelector((store) => store.pairs.array);
-
   const dispatch = useDispatch();
-
   const forPairs = () => {
     dispatch(setPairs(Array(+playerAmount).fill(0)));
   };
 
+  // Click Handlers
   const gridHandler = () => {
     dispatch(setGridSize(8));
   };
   const gridHandlerFalse = () => {
     dispatch(setGridSize(18));
   };
-
   const modeHandler = () => {
     dispatch(setMode(true));
   };
@@ -38,6 +35,10 @@ export default function Memory() {
     dispatch(setPlayerAmount(event.target.textContent));
   };
 
+  // Set color fot choosed player
+  useEffect(() => {
+    getPlayerColor("1");
+  }, []);
   const getPlayerColor = (player) => {
     if (player === playerAmount) {
       return "#304859";
@@ -46,9 +47,30 @@ export default function Memory() {
     }
   };
 
+  const saveData = () => {
+    user.game_mode = mode;
+    user.player_number = playerAmount;
+    user.size = gridSize;
+    localStorage.setItem("user", JSON.stringify(user));
+  };
+
+  let user = {
+    game_mode: mode,
+    player_number: playerAmount,
+    size: gridSize,
+  };
+  const data = localStorage.getItem("user");
+
+  if (data) {
+    user = JSON.parse(data);
+    user.game_mode = mode;
+    user.player_number = playerAmount;
+    user.size = gridSize;
+  }
+
   useEffect(() => {
-    getPlayerColor("1");
-  }, []);
+    saveData();
+  }, [mode, playerAmount, gridSize]);
 
   return (
     <>
@@ -103,16 +125,21 @@ export default function Memory() {
               6X6
             </Number6>
           </Choose1>
-
           <Link to="/game">
-            <Start onClick={forPairs}>Start Game</Start>
+            <Start
+              onClick={() => {
+                forPairs();
+                saveData();
+              }}
+            >
+              Start Game
+            </Start>
           </Link>
         </Selector>
       </Main>
     </>
   );
 }
-
 const Main = styled.div`
   max-width: 100%;
   min-height: 100vh;
@@ -126,7 +153,6 @@ const Main = styled.div`
     padding: 153px 393px 183px 393px;
   }
 `;
-
 const Header = styled.h1`
   font-size: 32px;
   line-height: 40px;
@@ -137,7 +163,6 @@ const Header = styled.h1`
     line-height: 50px;
   }
 `;
-
 const Selector = styled.div`
   width: 100%;
   border-radius: 10px;
@@ -146,7 +171,6 @@ const Selector = styled.div`
   padding: 24px;
   display: flex;
   flex-direction: column;
-
   @media (min-width: 768px) {
     border-radius: 20px;
     margin-top: 78px;
@@ -162,7 +186,6 @@ const H1 = styled.h1`
     line-height: 25px;
   }
 `;
-
 const Choose = styled.div`
   width: 100%;
   display: flex;
@@ -173,7 +196,6 @@ const Choose = styled.div`
     margin-top: 16px;
   }
 `;
-
 const NumberButton = styled.button`
   color: #fcfcfc;
   border-radius: 26px;
@@ -206,7 +228,6 @@ const IconButton = styled.button`
     line-height: 32px;
   }
 `;
-
 const H2 = styled.h1`
   font-size: 15px;
   line-height: 19px;
@@ -218,7 +239,6 @@ const H2 = styled.h1`
     margin-top: 32px;
   }
 `;
-
 const Players = styled.div`
   width: 100%;
   display: flex;
@@ -228,7 +248,6 @@ const Players = styled.div`
     margin-top: 16px;
   }
 `;
-
 const Player = styled.div`
   padding: 10px 26px 10px 26px;
   font-size: 16px;
@@ -248,7 +267,6 @@ const Player = styled.div`
     margin-left: 21px;
   }
 `;
-
 const H3 = styled.h1`
   font-size: 100%;
   line-height: 19px;
@@ -260,7 +278,6 @@ const H3 = styled.h1`
     margin-top: 32px;
   }
 `;
-
 const Choose1 = styled.div`
   width: 100%;
   display: flex;
@@ -273,7 +290,6 @@ const Choose1 = styled.div`
     margin-bottom: 33px;
   }
 `;
-
 const Number4 = styled.button`
   color: #fcfcfc;
   border-radius: 26px;
@@ -306,7 +322,6 @@ const Number6 = styled.button`
     padding: 11px 104px 9px 104px;
   }
 `;
-
 const Start = styled.button`
   padding: 12px 91px 14px 91px;
   font-size: 18px;

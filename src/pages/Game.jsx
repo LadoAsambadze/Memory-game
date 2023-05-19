@@ -2,11 +2,11 @@ import * as React from "react";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import SingleCard from "../Components/singleCard";
 import CountdownTimer from "../Components/timer";
 
-function Game(props) {
+function Game() {
   const [menu, setMenu] = useState(true);
   const mode = useSelector((store) => store.mode.Boolean);
   const playerAmount = useSelector((store) => store.playerAmount.value);
@@ -21,56 +21,9 @@ function Game(props) {
   const [finish, setFinish] = useState(false);
   const [double, setDouble] = useState(pairs);
   const [currentPlayer, setCurrentPlayer] = useState(0);
+  const [disable, setDisable] = useState(false);
 
-  const highestPairsIndex = double.indexOf(Math.max(...double));
-  const highesPlayer = highestPairsIndex + 1;
-  const hasEqualPairs = double.some(
-    (double, index) =>
-      double === double[highestPairsIndex] && index !== highestPairsIndex
-  );
-
-  useEffect(() => {
-    if (choiceOne && choiceTwo) {
-      if (mode) {
-        if (choiceOne.value === choiceTwo.value) {
-          setDouble((prevPairs) => {
-            const newPairs = [...prevPairs];
-            newPairs[currentPlayer] += 1;
-
-            return newPairs;
-          });
-        } else {
-          setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % playerAmount);
-        }
-      } else {
-        if (choiceOne.src === choiceTwo.src) {
-          setDouble((prevPairs) => {
-            const newPairs = [...prevPairs];
-            newPairs[currentPlayer] += 1;
-
-            return newPairs;
-          });
-        } else {
-          setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % playerAmount);
-        }
-      }
-    }
-  }, [choiceOne, choiceTwo]);
-
-  let timeShow = 120 - time;
-
-  const matchedItems = numArray.filter((num) => num.matched === true);
-  useEffect(() => {
-    if (matchedItems.length / 2 === gridSize) {
-      setFinish(true);
-      setStop(true);
-    }
-  }, [matchedItems, gridSize]);
-
-  const handleStop = () => {
-    setStop(!stop);
-  };
-
+  // Arrays with objects for Balls
   const numbers = [];
   const icon = [];
   const icons = [
@@ -94,36 +47,28 @@ function Game(props) {
     { src: "/pizza.png" },
   ];
 
-  function getRandomElements(arr, numElements) {
-    const shuffled = arr.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, numElements);
-  }
-
-  const randomArray = getRandomElements(icons, gridSize);
-
+  // Function to push  numbers
   if (mode) {
     for (let i = 0; i < gridSize; i++) {
       numbers.push({ value: i + 1, matched: false });
     }
   }
-
+  // Get random icons from array for push
+  function getRandomElements(arr, numElements) {
+    const shuffled = arr.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, numElements);
+  }
+  const randomArray = getRandomElements(icons, gridSize);
+  // Function to push  icons
   if (!mode) {
-    let pushCount;
-    if (gridSize === 8) {
-      pushCount = 2;
-    } else if (gridSize === 18) {
-      pushCount = 2;
-    }
-
-    if (pushCount) {
-      for (let i = 0; i < pushCount; i++) {
-        randomArray.forEach((item) => {
-          icon.push({ ...item, matched: false });
-        });
-      }
+    for (let i = 0; i < 2; i++) {
+      randomArray.forEach((item) => {
+        icon.push({ ...item, matched: false });
+      });
     }
   }
 
+  // Shuffle values/src randomly to balls
   useEffect(() => {
     shuffleCards();
   }, []);
@@ -144,12 +89,38 @@ function Game(props) {
     }
   };
 
-  const handleChoice = (num) => {
-    choiceOne ? setChoiceTwo(num) : setChoiceOne(num);
-  };
-
+  // Comparing two balls values/src and get turn for next player
   useEffect(() => {
     if (choiceOne && choiceTwo) {
+      if (mode) {
+        if (choiceOne.value === choiceTwo.value) {
+          setDouble((prevPairs) => {
+            const newPairs = [...prevPairs];
+            newPairs[currentPlayer] += 1;
+            return newPairs;
+          });
+        } else {
+          setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % playerAmount);
+        }
+      } else {
+        if (choiceOne.src === choiceTwo.src) {
+          setDouble((prevPairs) => {
+            const newPairs = [...prevPairs];
+            newPairs[currentPlayer] += 1;
+
+            return newPairs;
+          });
+        } else {
+          setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % playerAmount);
+        }
+      }
+    }
+  }, [choiceOne, choiceTwo]);
+
+  // Comparing balls src/values and count
+  useEffect(() => {
+    if (choiceOne && choiceTwo) {
+      setDisable(true);
       if (mode) {
         if (choiceOne.value === choiceTwo.value) {
           setNumArray((prevNums) => {
@@ -184,16 +155,44 @@ function Game(props) {
     }
   }, [choiceOne, choiceTwo]);
 
+  // Function for resetturns and balls
   const resetTurns = () => {
     setChoiceOne(null);
     setChoiceTwo(null);
     setTurns((prevTurns) => prevTurns + 1);
+    setDisable(false);
   };
 
+  // Finish game if all done / pause
+  const matchedItems = numArray.filter((num) => num.matched === true);
+  useEffect(() => {
+    if (matchedItems.length / 2 === gridSize) {
+      setFinish(true);
+      setStop(true);
+    }
+  }, [matchedItems, gridSize]);
+
+  // Handels to pause game or choose card
+
+  const handleStop = () => {
+    setStop(!stop);
+  };
+  const handleChoice = (num) => {
+    choiceOne ? setChoiceTwo(num) : setChoiceOne(num);
+  };
+  // Comparing results to get winner  player number
+  const highestPairsIndex = double.indexOf(Math.max(...double));
+  const highesPlayer = highestPairsIndex + 1;
+  const hasEqualPairs = double.some(
+    (double, index) =>
+      double === double[highestPairsIndex] && index !== highestPairsIndex
+  );
+
+  // Time Countdown for signle player
+  let timeShow = 120 - time;
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secondsRemaining = seconds % 60;
-
     return `${minutes.toString().padStart(2, "0")}:${secondsRemaining
       .toString()
       .padStart(2, "0")}`;
@@ -261,9 +260,9 @@ function Game(props) {
           {mode ? (
             <Ball gridAmount={gridSize}>
               {numArray.map((num) => {
-                // Add valid expressions here based on your logic for mode
                 return (
                   <SingleCard
+                    disable={disable}
                     key={num.id}
                     newnum={num}
                     newhandleChoice={handleChoice}
@@ -278,9 +277,9 @@ function Game(props) {
           ) : (
             <Ball gridAmount={gridSize}>
               {numArray.map((num) => {
-                // Add valid expressions here based on your logic for mode
                 return (
                   <SingleCard
+                    disable={disable}
                     key={num.id}
                     newnum={num}
                     newhandleChoice={handleChoice}
@@ -442,13 +441,11 @@ function Game(props) {
     </>
   );
 }
-
 const Main = styled.div`
   max-width: 100%;
   min-height: 100vh;
   padding: 24px;
   z-index: ${(props) => (props.menubar ? 30 : 5)};
-
   @media (min-width: 768px) {
     padding: 38px;
   }
@@ -456,14 +453,12 @@ const Main = styled.div`
     padding: 68px 165px 35px 165px;
   }
 `;
-
 const Heading = styled.div`
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 `;
-
 const H1 = styled.h1`
   color: #152938;
   font-size: 24px;
@@ -473,7 +468,6 @@ const H1 = styled.h1`
     line-height: 50px;
   }
 `;
-
 const Menu = styled.button`
   padding: 10px 18px 10px 18px;
   font-size: 16px;
@@ -499,11 +493,9 @@ const TabletMenu = styled.div`
     display: flex;
   }
 `;
-
 const Playzone = styled.div`
   width: 100%;
   margin-top: 80px;
-
   @media (min-width: 768px) {
     margin-top: ${(props) => (props.gridAmount === 8 ? "157px" : "121px")};
   }
@@ -511,7 +503,6 @@ const Playzone = styled.div`
     margin-top: ${(props) => (props.gridAmount === 8 ? "106px" : "85px")};
   }
 `;
-
 const Ball = styled.div`
   display: grid;
   grid-template-columns: ${(props) =>
@@ -519,7 +510,6 @@ const Ball = styled.div`
   grid-template-rows: ${(props) =>
     props.gridAmount === 8 ? "repeat(4, 1fr)" : "repeat(6, 1fr)"};
   gap: 10px;
-
   @media (min-width: 768px) {
     gap: ${(props) => (props.gridAmount === 8 ? "20px" : "16px")};
     padding-left: ${(props) => (props.gridAmount === 8 ? "80px" : "60px")};
@@ -531,7 +521,6 @@ const Ball = styled.div`
     padding-right: ${(props) => (props.gridAmount === 8 ? "290px" : "270px")};
   }
 `;
-
 const Pointzone = styled.div`
   width: 100%;
   display: grid;
@@ -547,7 +536,6 @@ const Pointzone = styled.div`
       ? "repeat(4, 1fr)"
       : null};
 `;
-
 const Player = styled.div`
   padding: 10px 20px 10px 20px;
   display: flex;
@@ -560,7 +548,6 @@ const Player = styled.div`
     line-height: 19px;
     text-align: left;
   }
-
   span:last-child {
     color: #304859;
     font-size: 24px;
@@ -593,7 +580,6 @@ const Player = styled.div`
     }
   }
 `;
-
 const Options = styled.div`
   position: absolute;
   width: 100%;
@@ -613,7 +599,6 @@ const OptionList = styled.div`
   flex-direction: column;
   justify-content: center;
   background-color: #f2f2f2;
-
   border-radius: 10px;
 `;
 const GameButton = styled.button`
@@ -647,7 +632,6 @@ const GameButtonTablet = styled.button`
     color: #fcfcfc;
   }
 `;
-
 const OnlyOne = styled.div`
   width: 100%;
   display: flex;
@@ -686,7 +670,6 @@ const TimeHeader = styled.p`
     line-height: 22px;
   }
 `;
-
 const TimeCount = styled.div`
   color: #304859;
   font-size: 24px;
@@ -712,7 +695,6 @@ const Moves = styled.div`
     justify-content: space-between;
   }
 `;
-
 const MovesHeader = styled.p`
   color: #7191a5;
   font-size: 15px;
@@ -723,7 +705,6 @@ const MovesHeader = styled.p`
     line-height: 22px;
   }
 `;
-
 const MovesCount = styled.p`
   color: #304859;
   font-size: 24px;
@@ -734,7 +715,6 @@ const MovesCount = styled.p`
     line-height: 40px;
   }
 `;
-
 const SingleScore = styled.div`
   width: 100%;
   height: 100%;
@@ -754,7 +734,6 @@ const SingleScore = styled.div`
     padding: 257px 393px;
   }
 `;
-
 const PlayersScore = styled.div`
   width: 100%;
   height: 100%;
@@ -774,7 +753,6 @@ const PlayersScore = styled.div`
     padding: 257px 393px;
   }
 `;
-
 const GetScore = styled.div`
   width: 100%;
   background-color: #f2f2f2;
@@ -798,7 +776,6 @@ const Congrats = styled.span`
     line-height: 60px;
   }
 `;
-
 const Comment = styled.span`
   font-size: 14px;
   line-height: 17px;
@@ -810,7 +787,6 @@ const Comment = styled.span`
     margin-top: 16px;
   }
 `;
-
 const Elapse = styled.div`
   border-radius: 5px;
   background-color: #dfe7ec;
@@ -827,7 +803,6 @@ const Elapse = styled.div`
     margin-top: 40px;
   }
 `;
-
 const ElapseText = styled.span`
   color: #7191a5;
   font-size: 13px;
@@ -846,7 +821,6 @@ const ElapseTime = styled.span`
     line-height: 40px;
   }
 `;
-
 const DivDirection = styled.div`
   width: 100%;
   display: flex;
@@ -854,7 +828,6 @@ const DivDirection = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-top: 24px;
-
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-between;
@@ -862,7 +835,6 @@ const DivDirection = styled.div`
     margin-top: 40px;
   }
 `;
-
 const Duplicate = styled.button`
   width: 100%;
   border: none;
@@ -882,7 +854,6 @@ const Duplicate = styled.button`
     margin-right: 16px;
   }
 `;
-
 const Duplicate2 = styled.button`
   width: 100%;
   border: none;

@@ -7,15 +7,16 @@ export default function SingleCard({
   newhandleChoice,
   flipped,
   gridAmount,
+  disable,
 }) {
   const handleClick = () => {
-    newhandleChoice(newnum);
+    if (!disable) {
+      newhandleChoice(newnum);
+    }
   };
   const mode = useSelector((store) => store.mode.Boolean);
   return (
     <Card>
-      
-
       <div className={flipped ? "flipped" : ""}>
         <Front
           flipped={flipped}

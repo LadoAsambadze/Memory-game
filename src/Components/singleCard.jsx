@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import "../Components/singleCard.css";
+import { useSelector } from "react-redux";
 
 export default function SingleCard({
   newnum,
@@ -10,9 +11,11 @@ export default function SingleCard({
   const handleClick = () => {
     newhandleChoice(newnum);
   };
-
+  const mode = useSelector((store) => store.mode.Boolean);
   return (
     <Card>
+      
+
       <div className={flipped ? "flipped" : ""}>
         <Front
           flipped={flipped}
@@ -20,7 +23,7 @@ export default function SingleCard({
           gridAmount={gridAmount}
           className="front"
         >
-          {newnum.value}
+          {mode ? newnum.value : <img src={newnum.src} alt="Image" />}
         </Front>
         <Back
           gridAmount={gridAmount}

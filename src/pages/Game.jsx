@@ -3,11 +3,12 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import SingleCard from "./Components/singleCard";
-import CountdownTimer from "./Components/timer";
+import SingleCard from "../Components/singleCard";
+import CountdownTimer from "../Components/timer";
 
 function Game(props) {
   const [menu, setMenu] = useState(true);
+  const mode = useSelector((store) => store.mode.Boolean);
   const playerAmount = useSelector((store) => store.playerAmount.value);
   const gridSize = useSelector((store) => store.gridSize.value);
   const pairs = useSelector((store) => store.pairs.array);
@@ -20,7 +21,6 @@ function Game(props) {
   const [finish, setFinish] = useState(false);
   const [double, setDouble] = useState(pairs);
   const [currentPlayer, setCurrentPlayer] = useState(0);
-  console.log(double);
 
   const highestPairsIndex = double.indexOf(Math.max(...double));
   const highesPlayer = highestPairsIndex + 1;
@@ -31,16 +31,28 @@ function Game(props) {
 
   useEffect(() => {
     if (choiceOne && choiceTwo) {
-      if (choiceOne.value === choiceTwo.value) {
-        setDouble((prevPairs) => {
-          const newPairs = [...prevPairs];
-          newPairs[currentPlayer] += 1;
-          console.log(newPairs);
+      if (mode) {
+        if (choiceOne.value === choiceTwo.value) {
+          setDouble((prevPairs) => {
+            const newPairs = [...prevPairs];
+            newPairs[currentPlayer] += 1;
 
-          return newPairs;
-        });
+            return newPairs;
+          });
+        } else {
+          setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % playerAmount);
+        }
       } else {
-        setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % 4);
+        if (choiceOne.src === choiceTwo.src) {
+          setDouble((prevPairs) => {
+            const newPairs = [...prevPairs];
+            newPairs[currentPlayer] += 1;
+
+            return newPairs;
+          });
+        } else {
+          setCurrentPlayer((prevPlayer) => (prevPlayer + 1) % playerAmount);
+        }
       }
     }
   }, [choiceOne, choiceTwo]);
@@ -60,19 +72,76 @@ function Game(props) {
   };
 
   const numbers = [];
-  for (let i = 0; i < gridSize; i++) {
-    numbers.push({ value: i + 1, matched: false });
+  const icon = [];
+  const icons = [
+    { src: "/anchor.png" },
+    { src: "/flask.png" },
+    { src: "/futbol.png" },
+    { src: "/hand-spock.png" },
+    { src: "/lira-sign.png" },
+    { src: "/moon.png" },
+    { src: "/sun.png" },
+    { src: "/car.png" },
+    { src: "/snowflake.png" },
+    { src: "/house.png" },
+    { src: "/umbrella.png" },
+    { src: "/tool.png" },
+    { src: "/notes.png" },
+    { src: "/microwawe.png" },
+    { src: "/dinner.png" },
+    { src: "/coffe.png" },
+    { src: "/chicken.png" },
+    { src: "/pizza.png" },
+  ];
+
+  function getRandomElements(arr, numElements) {
+    const shuffled = arr.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, numElements);
   }
+
+  const randomArray = getRandomElements(icons, gridSize);
+
+  if (mode) {
+    for (let i = 0; i < gridSize; i++) {
+      numbers.push({ value: i + 1, matched: false });
+    }
+  }
+
+  if (!mode) {
+    let pushCount;
+    if (gridSize === 8) {
+      pushCount = 2;
+    } else if (gridSize === 18) {
+      pushCount = 2;
+    }
+
+    if (pushCount) {
+      for (let i = 0; i < pushCount; i++) {
+        randomArray.forEach((item) => {
+          icon.push({ ...item, matched: false });
+        });
+      }
+    }
+  }
+
   useEffect(() => {
     shuffleCards();
   }, []);
 
   const shuffleCards = () => {
-    const shuffledCards = [...numbers, ...numbers]
-      .sort(() => Math.random() - 0.5)
-      .map((number) => ({ ...number, id: Math.random() }));
-    setNumArray(shuffledCards);
-    setTurns(0);
+    if (mode) {
+      const shuffledCards = [...numbers, ...numbers]
+        .sort(() => Math.random() - 0.5)
+        .map((number) => ({ ...number, id: Math.random() }));
+      setNumArray(shuffledCards);
+      setTurns(0);
+    } else {
+      const shuffledCards = [...icon]
+        .sort(() => Math.random() - 0.5)
+        .map((icn) => ({ ...icn, id: Math.random() }));
+      setNumArray(shuffledCards);
+      setTurns(0);
+    }
   };
 
   const handleChoice = (num) => {
@@ -81,19 +150,36 @@ function Game(props) {
 
   useEffect(() => {
     if (choiceOne && choiceTwo) {
-      if (choiceOne.value === choiceTwo.value) {
-        setNumArray((prevNums) => {
-          return prevNums.map((num) => {
-            if (num.value === choiceOne.value) {
-              return { ...num, matched: true };
-            }
-            return num;
+      if (mode) {
+        if (choiceOne.value === choiceTwo.value) {
+          setNumArray((prevNums) => {
+            return prevNums.map((num) => {
+              if (num.value === choiceOne.value) {
+                return { ...num, matched: true };
+              }
+              return num;
+            });
           });
-        });
 
-        resetTurns();
+          resetTurns();
+        } else {
+          setTimeout(() => resetTurns(), 700);
+        }
       } else {
-        setTimeout(() => resetTurns(), 700);
+        if (choiceOne.src === choiceTwo.src) {
+          setNumArray((prevNums) => {
+            return prevNums.map((num) => {
+              if (num.src === choiceOne.src) {
+                return { ...num, matched: true };
+              }
+              return num;
+            });
+          });
+
+          resetTurns();
+        } else {
+          setTimeout(() => resetTurns(), 700);
+        }
       }
     }
   }, [choiceOne, choiceTwo]);
@@ -118,6 +204,7 @@ function Game(props) {
       <Main>
         <Heading>
           <H1>memory</H1>
+
           <Menu
             onClick={() => {
               setMenu(false);
@@ -171,17 +258,41 @@ function Game(props) {
           </Options>
         </Heading>
         <Playzone gridAmount={gridSize}>
-          <Ball gridAmount={gridSize}>
-            {numArray.map((num) => (
-              <SingleCard
-                key={num.id}
-                newnum={num}
-                newhandleChoice={handleChoice}
-                flipped={num === choiceOne || num === choiceTwo || num.matched}
-                gridAmount={gridSize}
-              />
-            ))}
-          </Ball>
+          {mode ? (
+            <Ball gridAmount={gridSize}>
+              {numArray.map((num) => {
+                // Add valid expressions here based on your logic for mode
+                return (
+                  <SingleCard
+                    key={num.id}
+                    newnum={num}
+                    newhandleChoice={handleChoice}
+                    flipped={
+                      num === choiceOne || num === choiceTwo || num.matched
+                    }
+                    gridAmount={gridSize}
+                  />
+                );
+              })}
+            </Ball>
+          ) : (
+            <Ball gridAmount={gridSize}>
+              {numArray.map((num) => {
+                // Add valid expressions here based on your logic for mode
+                return (
+                  <SingleCard
+                    key={num.id}
+                    newnum={num}
+                    newhandleChoice={handleChoice}
+                    flipped={
+                      num === choiceOne || num === choiceTwo || num.matched
+                    }
+                    gridAmount={gridSize}
+                  />
+                );
+              })}
+            </Ball>
+          )}
         </Playzone>
         <Pointzone players={playerAmount}>
           <Player

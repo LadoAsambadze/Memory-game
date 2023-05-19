@@ -1,5 +1,5 @@
-import Memory from "./Memory";
-import Game from "./Game";
+import Memory from "./pages/Memory";
+import Game from "./pages/Game";
 import { Route, Routes } from "react-router-dom";
 
 function App() {
@@ -7,7 +7,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Memory />} />
-        <Route path="/Game" element={<Game flipped={true} />} />
+        <Route path="/game" element={<Game />} />
       </Routes>
     </>
   );

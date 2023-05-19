@@ -4,10 +4,10 @@ import styled from "styled-components";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { setGridSize } from "./store/nameSlice";
-import { setMode } from "./store/modeSlice";
-import { setPlayerAmount } from "./store/playerSlice";
-import { setPairs } from "./store/pairsSlice";
+import { setGridSize } from "../store/nameSlice";
+import { setMode } from "../store/modeSlice";
+import { setPlayerAmount } from "../store/playerSlice";
+import { setPairs } from "../store/pairsSlice";
 
 export default function Memory() {
   const gridSize = useSelector((store) => store.gridSize.value);
@@ -103,7 +103,8 @@ export default function Memory() {
               6X6
             </Number6>
           </Choose1>
-          <Link to="/Game">
+
+          <Link to="/game">
             <Start onClick={forPairs}>Start Game</Start>
           </Link>
         </Selector>
